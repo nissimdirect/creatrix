@@ -36,13 +36,13 @@ from directives import DIRECTIVES
 BG        = (30, 30, 30)       # Charcoal background
 BG_DARK   = (22, 22, 22)       # Deeper charcoal
 BG_CARD   = (36, 36, 36)       # Card/panel interior
-TEXT      = (184, 224, 110)    # Yellowish-green primary
-TEXT_BRT  = (212, 255, 127)    # Bright emphasis
-TEXT_DIM  = (122, 156, 58)     # De-emphasized
-TEXT_GHOST = (61, 80, 32)      # Barely visible
+TEXT      = (204, 204, 120)    # Toxic yellow-green (amber-shifted terminal)
+TEXT_BRT  = (230, 230, 140)    # Bright emphasis
+TEXT_DIM  = (140, 140, 72)     # De-emphasized
+TEXT_GHOST = (70, 70, 36)      # Barely visible
 UV_VIOLET = (123, 97, 255)    # Special accent
 RED_CORE  = (255, 45, 45)     # Danger/emphasis
-BORDER    = (58, 80, 32)      # Green-tinted border
+BORDER    = (80, 80, 40)      # Warm-tinted border
 
 # ── Constants ────────────────────────────────────────────────────────────
 
@@ -50,7 +50,6 @@ WIN_W, WIN_H = 720, 560
 FPS = 60
 FADE_DURATION = 0.4            # Seconds to fade in card text
 STAGGER_DELAY = 0.12           # Seconds between mutate lines
-ABSORB_DURATION = 3.0          # Seconds before card auto-flips back
 
 MENLO_PATH = "/System/Library/Fonts/Menlo.ttc"
 CHAR_W_APPROX = 10            # Approximate monospace character width at size 16
@@ -230,10 +229,7 @@ class App:
                     self.state = STATE_REVEALED
                     self.reveal_time = now
             elif self.state == STATE_REVEALED:
-                # Auto-flip back after absorb duration
-                if now - self.reveal_time >= ABSORB_DURATION:
-                    self.state = STATE_HIDING
-                    self.anim_start = now
+                pass  # Stay revealed until user clicks/presses space
             elif self.state == STATE_HIDING:
                 self.fade_alpha = max(1.0 - elapsed / FADE_DURATION, 0.0)
                 if self.fade_alpha <= 0.0:
