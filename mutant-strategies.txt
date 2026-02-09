@@ -1,0 +1,292 @@
+# Chaos Oracle — Mutant Strategy Deck
+# 235 strategies derived from 23 creative traditions
+# Audited against Eno/Schmidt voice DNA:
+#   - No name-drops, no jargon-definitions, no academic framing
+#   - Imperative or interrogative mood preferred
+#   - Target 2-8 words per card, max 12
+#   - No terminal punctuation (except questions)
+#
+# Created: 2026-02-08 | Revised: 2026-02-09
+# By: Pop Chaos Labs
+# Companion to: oblique-strategies.txt (195 original Eno/Schmidt strategies)
+
+# --- SITUATIONIST INTERNATIONAL ---
+Steal from the spectacle and return it broken
+Drift through the structure without a map
+What would this sound like as graffiti on a billboard?
+Give it away. What changes?
+Make this a conversation, not a broadcast
+Refuse the assigned route
+Construct a situation, not an object
+Where do you get lost in this? Go there
+Treat the recording as a city you've never walked through
+Sabotage your own efficiency
+Wander without destination
+Make the invisible architecture audible
+Connect everything that was separated
+What is this work advertising? Remove that
+
+# --- FLUXUS ---
+Write instructions for performing this
+The instruction is the work
+Make something so simple it becomes profound
+What lives between these two forms?
+This is not a rehearsal. This is the performance
+Mail this to a stranger
+Box everything and call it finished
+Perform this piece by reading its title aloud
+The score should fit on a postcard
+Ordinary materials, extraordinary attention
+A concert of one sound
+What happens when the medium dissolves?
+Exit music -- play only the parts where people leave
+Humor is a valid structural element
+
+# --- CONCEPTUAL ART ---
+The idea is the machine that makes the art
+Remove the object. What remains?
+Write instructions someone else could follow blindly
+The plan is the work. Follow it without judgment
+Your statement of intent is the final form
+What if the documentation IS the piece?
+Apply the same operation to every element
+Remove authorship. What's left?
+Language is sufficient material
+One sentence can be a complete work
+Enumerate every decision. Now make the opposite ones
+All possible combinations of three elements
+Replace every aesthetic choice with a system
+
+# --- PERFORMANCE ART ---
+How long can you sustain this single gesture?
+What remains when the body is the only instrument?
+Endure it into existence
+The audience completes the work
+Presence over production
+Real time is the only honest time
+What would this be as a 6-hour performance?
+The vulnerability is the point
+Repeat until transformation
+Risk something
+Your body already knows the rhythm -- stop thinking
+Do it live, accept the failures
+Ritualize it
+Let exhaustion make the decisions
+
+# --- INSTITUTIONAL CRITIQUE ---
+Name the frame
+What institution does this work serve?
+The speaker cone is not neutral
+Who paid for this? How does that change it?
+Make the support structure visible
+The context IS the content
+Critique the tool you're using, with the tool you're using
+The silence between tracks is a fiction
+Question who gets to call this music
+Where does the power live in this arrangement?
+Show how it was made
+Name the ideology of your tools
+
+# --- RELATIONAL AESTHETICS ---
+Design a micro-utopia that lasts exactly as long as the track
+It only exists between people
+Make the listener feel welcome
+The listener is a collaborator, not a consumer
+Cook a meal with these sounds
+Make something people want to gather around
+The contract between maker and listener -- rewrite it
+Build a whole world in four bars
+Exchange, not broadcast
+Who are you inviting in? Who are you excluding?
+
+# --- POST-INTERNET ---
+The network is the gallery. Circulate it
+Embrace low resolution
+Default settings are a creative choice
+Screenshot this and call it finished
+How does this degrade when compressed?
+One post among millions. Act accordingly
+What does this look like at 2x speed scrolling past?
+The file has a body. Where does it hurt?
+Surface is depth
+Use the attention span as the form
+Make it for a phone speaker, not studio monitors
+The copy is the original
+What does the container want?
+Circulation over completion
+Render at the lowest possible quality. Is it still yours?
+
+# --- DECOLONIAL THEORY ---
+Opacity is a right -- not everything needs to be understood
+Create from the edge, not the center
+Whose knowledge system built this tool?
+Leave something untranslated
+Break the rules you were taught
+What tradition are you unconsciously continuing?
+The wound speaks its own language
+Let two systems contaminate each other
+Make something that escapes capture
+What if you owed nothing to the canon?
+Center what you were taught to put in the margins
+Whose story is missing?
+
+# --- FEMINIST ART ---
+Make the domestic monumental
+Treat care as a creative act
+Do the work that sustains the work
+What invisible labor went into this?
+Embody the contradiction
+Pleasure beyond utility
+What would this sound like from inside the body?
+Become porous
+Refuse mastery
+Who cleans up after the performance?
+Tend to what's already growing
+Make a thousand people feel alone with you
+
+# --- SOUND STUDIES / DEEP LISTENING ---
+Hear everything. Judge nothing
+The environment is already composing
+What is the sound of this room?
+The silence is full of sound
+Leave the studio. Bring your ears
+The ear is always open -- you cannot close it
+What's below hearing that you can still feel?
+Remove the source. What remains?
+Make a sound map of where you are right now
+Duration of decay
+
+# --- GLITCH THEORY ---
+The error is the message
+Honor the artifact
+The glitch reveals what the system hides
+Break it on purpose, then listen to what it says
+Noise is information the system wasn't designed for
+Compression as composition
+The machine's desire -- let it fail the way it wants to
+Data decay as patina
+Run it through the wrong codec
+The bug is a feature -- the feature is ideology
+Dirty new media
+Corrupt the header, keep the body
+What the tool wasn't designed to do is what it does best
+Glitch is a verb. Glitch yourself
+
+# --- NEW MATERIALISM ---
+What does the material want to become?
+Even dead things hum
+You and the instrument are making each other
+Let the algorithm decide one thing
+What is this from the tool's perspective?
+No element is more important than any other
+What creature moves like this rhythm?
+This is not a song. It's an ecology
+The material remembers
+Making-with, not making-alone
+Let the grain speak
+Who is actually composing?
+
+# --- HAUNTOLOGY ---
+The ghost of the future that never arrived
+What music did the year 2000 promise?
+The medium's memory is showing through
+Lost futures are still futures
+Nostalgia for something that never existed
+Mourn the canceled future. Build a new one
+What does this piece remember?
+Let two eras coexist
+The sample carries its past
+Something is here that shouldn't be
+Something is missing that should be here
+Record over an old tape -- what bleeds through?
+Ruins are more honest than new buildings
+
+# --- AFRO-FUTURISM ---
+The mothership is a studio
+Meet in the break
+You were never meant to fit. Use that
+Everything you touch, you change
+Invent a cosmology for this track
+The drum is the first computer
+The space between beats is where freedom lives
+Color the void
+Code-switch the genre
+Make music for a world that doesn't exist yet
+Improvisation is survival technology
+
+# --- DADA / SURREALISM ---
+Cut it up. Reassemble by chance
+Make each section blind to the others
+Write without editing for five minutes
+Dream logic, not narrative logic
+The accident is smarter than you
+
+# --- MINIMALISM ---
+One note. How many ways can it change?
+Phase it against itself
+Subtract until it hurts, then subtract one more
+The grid is a field, not a prison
+Solo each element. Which can you lose?
+
+# --- NOISE / INDUSTRIAL ---
+Weaponize the frequency
+Make it physically uncomfortable
+The body flinches. Good. Keep going
+
+# --- PUNK / DIY ---
+Three elements. No more. Ship it
+Polish is a form of cowardice
+The demo IS the album
+If you can't play it, play it anyway
+
+# --- SYSTEMS / GENERATIVE ---
+Write a rule. Follow it until it breaks
+Let the algorithm finish the sentence
+Automate the part you love most
+
+# --- LAND ART / ENTROPY ---
+Let it rot. What survives?
+Bury it and dig it up in a week
+Erosion is a collaborator
+
+# --- DESIGN / TYPOGRAPHY ---
+What typeface is this sound?
+Negative space is doing the work
+The grid you can't see is the one controlling you
+Zoom in until the pixels are the landscape
+The surface is lying. What's underneath?
+
+# --- CROSS-MODAL ---
+Translate this into a smell. Now translate the smell back
+What temperature is this? Change it
+Set a trap for your future self
+Perform this for an audience of insects
+The power went out. Finish by candlelight
+Put this in a language you don't speak
+What would this weigh? Make it heavier
+This piece is evidence in a trial. What crime?
+Make the version that gets you fired
+Invert every decision. Keep only what improved
+What is this piece's last meal before execution?
+Your collaborator is gravity
+Make this in actual darkness
+This is the soundtrack to someone's worst day
+Teach this to a child. What do they change?
+Find the midpoint between this and its opposite
+Use only materials that decompose within a month
+Interview the silence. What is it refusing to say?
+This piece is a rumor about you. Is it true?
+Play it at half speed. What genre did it become?
+Convert the medium. What changed?
+
+# --- DANGER ---
+Make the version you're ashamed of
+What are you avoiding? Go directly there
+Who will this hurt? Make it anyway
+Admit what this is really about
+Show the part you'd normally edit out
+Make it worse on purpose. Notice what you're protecting
+Your taste is a prison. Betray it
+Dedicate this to the person you've wronged most
+What would you make if no one would ever know?
+Identify the lie in this piece. Keep it
