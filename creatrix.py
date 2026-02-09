@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Creatrix — A Chaos Oracle by Pop Chaos Labs
+"""Creatrix (formerly Chaos Oracle / chaos-oracle.py) — A Chaos Oracle by Pop Chaos Labs
 
 Creative strategy deck combining Brian Eno & Peter Schmidt's 195 original
 Oblique Strategies with 235 mutant strategies derived from 23 art and creative
 traditions. Features smart collision mode that pairs cards from different
 lineages for productive creative friction.
 
+Aliases: Creatrix, Chaos Oracle, chaos-oracle.py, creatrix.py
+
 Usage:
-    python3 chaos-oracle.py              # 1 random card from full deck
+    python3 creatrix.py                  # 1 random card from full deck
     python3 chaos-oracle.py -n 3         # 3 random cards
     python3 chaos-oracle.py --original   # draw only from Eno/Schmidt
     python3 chaos-oracle.py --mutant     # draw only from mutants
