@@ -83,13 +83,13 @@ class App:
     def __init__(self):
         pygame.init()
         ft_init()
-        self.screen = pygame.display.set_mode((WIN_W, WIN_H), pygame.RESIZABLE)
-        pygame.display.set_caption("CREATRIX")
-        # Set window icon (BMP for PyGame SDL compatibility)
+        # Set icon BEFORE set_mode (macOS requirement)
         icon_path = os.path.join(os.path.dirname(__file__), "icon.bmp")
         if os.path.exists(icon_path):
             icon_surf = pygame.image.load(icon_path)
             pygame.display.set_icon(icon_surf)
+        self.screen = pygame.display.set_mode((WIN_W, WIN_H), pygame.RESIZABLE)
+        pygame.display.set_caption("CREATRIX")
         self.clock = pygame.time.Clock()
 
         self._init_fonts()
