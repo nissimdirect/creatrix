@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 *.pyo
 .DS_Store
-icon-candidates/
+# icon-candidates/ tracked — final keepers only

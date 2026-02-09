@@ -16,6 +16,7 @@ Uses pygame._freetype directly to avoid circular import bug in
 pygame 2.6.1 + Python 3.14.
 """
 
+import os
 import sys
 import random
 import time
@@ -84,6 +85,11 @@ class App:
         ft_init()
         self.screen = pygame.display.set_mode((WIN_W, WIN_H), pygame.RESIZABLE)
         pygame.display.set_caption("CREATRIX")
+        # Set window icon
+        icon_path = os.path.join(os.path.dirname(__file__), "icon.png")
+        if os.path.exists(icon_path):
+            icon_surf = pygame.image.load(icon_path)
+            pygame.display.set_icon(icon_surf)
         self.clock = pygame.time.Clock()
 
         self._init_fonts()
