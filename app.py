@@ -83,11 +83,16 @@ class App:
     def __init__(self):
         pygame.init()
         ft_init()
-        # Set icon BEFORE set_mode (macOS requirement)
-        icon_path = os.path.join(os.path.dirname(__file__), "icon.bmp")
-        if os.path.exists(icon_path):
-            icon_surf = pygame.image.load(icon_path)
-            pygame.display.set_icon(icon_surf)
+        # Set macOS dock icon via Cocoa (SDL set_icon doesn't work on macOS)
+        icon_png = os.path.join(os.path.dirname(__file__), "icon.png")
+        try:
+            from AppKit import NSApplication, NSImage
+            app = NSApplication.sharedApplication()
+            ns_image = NSImage.alloc().initWithContentsOfFile_(icon_png)
+            if ns_image:
+                app.setApplicationIconImage_(ns_image)
+        except Exception:
+            pass
         self.screen = pygame.display.set_mode((WIN_W, WIN_H), pygame.RESIZABLE)
         pygame.display.set_caption("CREATRIX")
         self.clock = pygame.time.Clock()
