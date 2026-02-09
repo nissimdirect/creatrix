@@ -83,18 +83,10 @@ class App:
     def __init__(self):
         pygame.init()
         ft_init()
-        # Set macOS dock icon via Cocoa (SDL set_icon doesn't work on macOS)
-        icon_png = os.path.join(os.path.dirname(__file__), "icon.png")
-        try:
-            from AppKit import NSApplication, NSImage
-            app = NSApplication.sharedApplication()
-            ns_image = NSImage.alloc().initWithContentsOfFile_(icon_png)
-            if ns_image:
-                app.setApplicationIconImage_(ns_image)
-        except Exception:
-            pass
         self.screen = pygame.display.set_mode((WIN_W, WIN_H), pygame.RESIZABLE)
         pygame.display.set_caption("CREATRIX")
+        # Set macOS dock icon AFTER pygame init (pygame.init resets NSApp icon)
+        self._set_macos_icon()
         self.clock = pygame.time.Clock()
 
         self._init_fonts()
@@ -126,6 +118,19 @@ class App:
         # Animation
         self.fade_alpha = 0.0
         self.mutate_line_alphas = [0.0] * 5  # A, ×, B, separator, HOW
+
+    def _set_macos_icon(self):
+        """Set dock icon on macOS via Cocoa. Must be called AFTER pygame.init."""
+        try:
+            from AppKit import NSApplication, NSImage
+            icon_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "icon.png"
+            )
+            ns_image = NSImage.alloc().initWithContentsOfFile_(icon_path)
+            if ns_image:
+                NSApplication.sharedApplication().setApplicationIconImage_(ns_image)
+        except Exception:
+            pass
 
     def _init_fonts(self):
         font_path = MENLO_PATH if Path(MENLO_PATH).exists() else None
