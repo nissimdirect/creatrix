@@ -232,9 +232,13 @@ def classify_directive(text: str) -> str:
     return best
 
 
-def _kw(parsed: dict, idx: int = 0, fallback: str = 'this') -> str:
+def _kw(parsed: dict, idx: int = 0, fallback: str = 'work') -> str:
+    """Return keyword as a grammatical noun phrase with article."""
     kws = parsed.get('keywords', [])
-    return kws[idx] if idx < len(kws) else kws[0] if kws else fallback
+    word = kws[idx] if idx < len(kws) else kws[0] if kws else None
+    if word is None:
+        return f'the {fallback}'
+    return f'the {word}'
 
 
 def _v(parsed: dict, fallback: str = 'make') -> str:
@@ -247,63 +251,63 @@ TEMPLATES = {
             f"{a['verb'].capitalize()} {b['object'] if b.get('object') and len(b['object'].split()) >= 2 else _kw(b)} until it dissolves"
             if a.get('verb') and a['verb'] not in ('let', 'get', 'put', 'set') else None
         ),
-        lambda a, b: f"Let {_kw(a, fallback='the structure')} absorb {_kw(b, fallback='the material')} whole",
+        lambda a, b: f"Let {_kw(a, fallback='structure')} absorb {_kw(b, fallback='material')} whole",
         lambda a, b: f"{_v(a).capitalize()} what {_v(b)}s" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Feed {_kw(b)} to {_kw(a, fallback='the process')}",
+        lambda a, b: f"Feed {_kw(b, fallback='work')} to {_kw(a, fallback='process')}",
         lambda a, b: f"What survives when {_kw(a, fallback='form')} consumes {_kw(b, fallback='content')}?",
-        lambda a, b: f"Replace {_kw(b, fallback='the detail')} entirely with {_kw(a, fallback='the structure')}",
-        lambda a, b: f"Dissolve {_kw(a, fallback='the framework')}. Keep only {_kw(b, fallback='the residue')}",
+        lambda a, b: f"Replace {_kw(b, fallback='detail')} entirely with {_kw(a, fallback='structure')}",
+        lambda a, b: f"Dissolve {_kw(a, fallback='framework')}. Keep only {_kw(b, fallback='residue')}",
         lambda a, b: f"{_v(a).capitalize()} it bare. Now {_v(b)} from the residue" if a.get('verb') and b.get('verb') else None,
     ],
     'fuse': [
         lambda a, b: f"Where {_v(a)} meets {_v(b)}, stay there" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Half {_kw(a, fallback='controlled')}, half {_kw(b, fallback='accidental')} -- commit to neither",
+        lambda a, b: f"Half {_kw(a, fallback='intent')}, half {_kw(b, fallback='accident')} -- commit to neither",
         lambda a, b: f"The child of {_kw(a, fallback='method')} and {_kw(b, fallback='accident')}",
         lambda a, b: f"Merge {_kw(a, fallback='familiar')} with {_kw(b, fallback='foreign')}",
         lambda a, b: f"What if you {_v(a)} and {_v(b)} at the same time?" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Neither {_kw(a, fallback='this')} nor {_kw(b, fallback='that')} -- the thing between",
+        lambda a, b: f"Neither {_kw(a, fallback='intent')} nor {_kw(b, fallback='outcome')} -- the thing between",
         lambda a, b: f"Half {_kw(a, fallback='intent')}, half {_kw(b, fallback='mistake')} -- which half wins?",
-        lambda a, b: f"{_v(a).capitalize()} {_kw(a)} until {_kw(b, fallback='the material')} answers back" if a.get('verb') and a.get('keywords') else None,
+        lambda a, b: f"{_v(a).capitalize()} {_kw(a)} until {_kw(b, fallback='material')} answers back" if a.get('verb') and a.get('keywords') else None,
     ],
     'translate': [
-        lambda a, b: f"{_v(a).capitalize()} it in the language of {_kw(b, fallback='the body')}" if a.get('verb') else None,
-        lambda a, b: f"How would {_kw(b, fallback='a child')} express {_kw(a, fallback='urgency')}?",
-        lambda a, b: f"Rewrite {_kw(a, fallback='the rules')} using only {_kw(b, fallback='gestures')}",
+        lambda a, b: f"{_v(a).capitalize()} it in the language of {_kw(b, fallback='body')}" if a.get('verb') else None,
+        lambda a, b: f"How would {_kw(b, fallback='child')} express {_kw(a, fallback='urgency')}?",
+        lambda a, b: f"Rewrite {_kw(a, fallback='rules')} using only {_kw(b, fallback='gestures')}",
         lambda a, b: f"What does {_kw(a, fallback='sound')} become when {_kw(b, fallback='urgency')} takes over?",
-        lambda a, b: f"Misinterpret {_kw(a, fallback='the original')} on purpose",
-        lambda a, b: f"Say {_kw(a, fallback='the difficult part')} in the voice of {_kw(b, fallback='someone who hates it')}",
-        lambda a, b: f"{_kw(a, fallback='Form').capitalize()} translated badly is still {_kw(b, fallback='form')}",
-        lambda a, b: f"{_v(b).capitalize()} {_kw(a)} into {_kw(b, fallback='a different medium')}" if b.get('verb') else None,
+        lambda a, b: f"Misinterpret {_kw(a, fallback='original')} on purpose",
+        lambda a, b: f"Say {_kw(a, fallback='difficult part')} in the voice of {_kw(b, fallback='critic')}",
+        lambda a, b: f"{_kw(a, fallback='form').capitalize()} translated badly is still {_kw(b, fallback='form')}",
+        lambda a, b: f"{_v(b).capitalize()} {_kw(a)} into {_kw(b, fallback='medium')}" if b.get('verb') else None,
     ],
     'invert': [
         lambda a, b: f"{_v(a).capitalize()} what hides. {_v(b).capitalize()} what reveals" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Do the opposite of {_kw(a, fallback='order')}. Keep the {_kw(b, fallback='residue')}",
-        lambda a, b: f"{_kw(a, fallback='Precision').capitalize()} pretends to be {_kw(b, fallback='roughness')}. Call it out",
+        lambda a, b: f"Do the opposite of {_kw(a, fallback='order')}. Keep {_kw(b, fallback='residue')}",
+        lambda a, b: f"{_kw(a, fallback='precision').capitalize()} pretends to be {_kw(b, fallback='roughness')}. Call it out",
         lambda a, b: f"The wrong way to {_v(a)} {_kw(b)} is the right way" if a.get('verb') else None,
         lambda a, b: f"Turn {_kw(a, fallback='strength')} into {_kw(b, fallback='weakness')} -- is it better?",
         lambda a, b: f"Everything you know about {_kw(a, fallback='form')} is wrong",
-        lambda a, b: f"Reverse the {_kw(a, fallback='process')}. Start from {_kw(b, fallback='the end')}",
+        lambda a, b: f"Reverse {_kw(a, fallback='process')}. Start from {_kw(b, fallback='end')}",
         lambda a, b: f"The opposite of {_kw(a, fallback='precision')} is not {_kw(b, fallback='roughness')}",
     ],
     'metaphor': [
-        lambda a, b: f"Think about {_kw(a, fallback='the work')} while you {_v(b)}" if b.get('verb') else None,
-        lambda a, b: f"{_kw(a, fallback='Sound').capitalize()} is a container for {_kw(b, fallback='the raw material')}",
-        lambda a, b: f"The map says {_kw(a, fallback='here')}. The territory says {_kw(b, fallback='elsewhere')}",
-        lambda a, b: f"Treat {_kw(a, fallback='the work')} as if it were {_kw(b, fallback='alive')}",
-        lambda a, b: f"What orbit does {_kw(a, fallback='form')} trace around {_kw(b, fallback='the difficult part')}?",
-        lambda a, b: f"{_kw(a, fallback='Rhythm').capitalize()} is the structure. {_kw(b, fallback='Space').capitalize()} is the pause",
-        lambda a, b: f"If {_kw(a, fallback='this')} had weight, how heavy would {_kw(b, fallback='it')} make it?",
-        lambda a, b: f"Carry {_kw(a, fallback='the work')} like a secret",
+        lambda a, b: f"Think about {_kw(a, fallback='work')} while you {_v(b)}" if b.get('verb') else None,
+        lambda a, b: f"{_kw(a, fallback='sound').capitalize()} is a container for {_kw(b, fallback='raw material')}",
+        lambda a, b: f"The map says {_kw(a, fallback='safety')}. The territory says {_kw(b, fallback='danger')}",
+        lambda a, b: f"Treat {_kw(a, fallback='work')} as if it were {_kw(b, fallback='opposite')}",
+        lambda a, b: f"What orbit does {_kw(a, fallback='form')} trace around {_kw(b, fallback='center')}?",
+        lambda a, b: f"{_kw(a, fallback='rhythm').capitalize()} is the structure. {_kw(b, fallback='space').capitalize()} is the pause",
+        lambda a, b: f"If {_kw(a, fallback='sound')} had weight, how heavy would {_kw(b, fallback='feeling')} make it?",
+        lambda a, b: f"Carry {_kw(a, fallback='work')} like a secret",
     ],
     'collide': [
         lambda a, b: f"Crash {_kw(a, fallback='order')} into {_kw(b, fallback='accident')} -- use what survives",
-        lambda a, b: f"{_v(a).capitalize()} {_kw(a, fallback='form')} at {_kw(b, fallback='full speed')}. Keep the shrapnel" if a.get('verb') else None,
+        lambda a, b: f"{_v(a).capitalize()} {_kw(a, fallback='form')} at {_kw(b, fallback='speed')}. Keep the shrapnel" if a.get('verb') else None,
         lambda a, b: f"Maximum velocity: {_kw(a, fallback='signal')} meets {_kw(b, fallback='static')}",
         lambda a, b: f"The debris of {_kw(a, fallback='method')} and {_kw(b, fallback='instinct')} is the material",
-        lambda a, b: f"Stack {_kw(a, fallback='layers')}. Remove {_kw(b, fallback='the foundation')}",
-        lambda a, b: f"Force {_kw(a, fallback='the elements')} together. Keep only what fused",
-        lambda a, b: f"{_kw(a, fallback='Form').capitalize()} and {_kw(b, fallback='content')} collide. Pick through the wreckage",
-        lambda a, b: f"Throw {_kw(a, fallback='precision')} against {_kw(b, fallback='the opposite')}",
+        lambda a, b: f"Stack {_kw(a, fallback='layers')}. Remove {_kw(b, fallback='foundation')}",
+        lambda a, b: f"Force {_kw(a, fallback='elements')} together. Keep only what fused",
+        lambda a, b: f"{_kw(a, fallback='form').capitalize()} and {_kw(b, fallback='content')} collide. Pick through the wreckage",
+        lambda a, b: f"Throw {_kw(a, fallback='precision')} against {_kw(b, fallback='opposite')}",
     ],
 }
 
@@ -401,6 +405,11 @@ def _quality_gate(text: str) -> bool:
         re.compile(r'\b(its|your|their|our)\s*[.!?]?\s*$', re.I),
         re.compile(r'\b(\w+)\s+\1\b', re.I),
         re.compile(r'\b(the|a)\s+(the|a)\b', re.I),
+        re.compile(r'\bthe\s+\w+ly\b', re.I),  # "the directly", "the honestly" — adverbs
+        re.compile(r'\bthe\s+(anyone|everyone|someone|nobody|somebody|nothing|everything|something)\b', re.I),
+        re.compile(r"\bthe\s+\w+'s\b", re.I),  # "the children's" — possessives
+        re.compile(r"\bthe\s+\w+'t\b", re.I),  # "the don't", "the can't" — contractions
+        re.compile(r'\bthe\s+\w+\s+the\s+\w+\s+the\b', re.I),  # triple "the" in 5 words
     ]
     for pattern in broken_patterns:
         if pattern.search(text):
