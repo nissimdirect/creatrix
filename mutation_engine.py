@@ -76,6 +76,11 @@ VOICE_STARTERS = IMP_VERBS | frozenset([
     'what', 'how', 'where', 'who', 'when', 'why', 'which',
     'the', 'a', 'if', 'no', 'neither', 'half', 'dream',
     'maximum', 'impact',
+    # Template-specific verbs
+    'hollow', 'dissolve', 'strip', 'graft', 'breed', 'sew',
+    'say', 'misinterpret', 'whisper', 'rewrite', 'everything',
+    'reverse', 'swap', 'carry', 'weigh', 'crash', 'throw',
+    'pick', 'stack', 'force', 'detonate', 'drag',
 ])
 
 # ── Layer 1: Markov ─────────────────────────────────────────────────────
@@ -241,73 +246,75 @@ def _kw(parsed: dict, idx: int = 0, fallback: str = 'work') -> str:
     return f'the {word}'
 
 
+def _tn(parsed: dict) -> str:
+    """Return pre-picked tradition-themed noun for this card."""
+    return parsed.get('_tn', 'work')
+
+
 def _v(parsed: dict, fallback: str = 'make') -> str:
     return parsed.get('verb') or fallback
 
 
 TEMPLATES = {
     'devour': [
-        lambda a, b: (
-            f"{a['verb'].capitalize()} {b['object'] if b.get('object') and len(b['object'].split()) >= 2 else _kw(b)} until it dissolves"
-            if a.get('verb') and a['verb'] not in ('let', 'get', 'put', 'set') else None
-        ),
-        lambda a, b: f"Let {_kw(a, fallback='structure')} absorb {_kw(b, fallback='material')} whole",
-        lambda a, b: f"{_v(a).capitalize()} what {_v(b)}s" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Feed {_kw(b, fallback='work')} to {_kw(a, fallback='process')}",
-        lambda a, b: f"What survives when {_kw(a, fallback='form')} consumes {_kw(b, fallback='content')}?",
-        lambda a, b: f"Replace {_kw(b, fallback='detail')} entirely with {_kw(a, fallback='structure')}",
-        lambda a, b: f"Dissolve {_kw(a, fallback='framework')}. Keep only {_kw(b, fallback='residue')}",
-        lambda a, b: f"{_v(a).capitalize()} it bare. Now {_v(b)} from the residue" if a.get('verb') and b.get('verb') else None,
+        lambda a, b: f"{_v(a).capitalize()} the {_tn(b)} until only {_tn(a)} remains" if a.get('verb') else None,
+        lambda a, b: f"Hollow out the {_tn(a)}. Fill it with {_tn(b)}",
+        lambda a, b: f"Feed the {_tn(a)} to the {_tn(b)}",
+        lambda a, b: f"What does {_tn(a)} taste like after {_tn(b)} consumes it?",
+        lambda a, b: f"Let the {_tn(b)} rot. Plant {_tn(a)} in the remains",
+        lambda a, b: f"Dissolve the {_tn(b)}. Keep only the stain",
+        lambda a, b: f"Strip it down to {_tn(a)}. Then strip that too",
+        lambda a, b: f"The {_tn(a)} swallowed the {_tn(b)}. What changed inside?",
     ],
     'fuse': [
-        lambda a, b: f"Where {_v(a)} meets {_v(b)}, stay there" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Half {_kw(a, fallback='intent')}, half {_kw(b, fallback='accident')} -- commit to neither",
-        lambda a, b: f"The child of {_kw(a, fallback='method')} and {_kw(b, fallback='accident')}",
-        lambda a, b: f"Merge {_kw(a, fallback='familiar')} with {_kw(b, fallback='foreign')}",
-        lambda a, b: f"What if you {_v(a)} and {_v(b)} at the same time?" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Neither {_kw(a, fallback='intent')} nor {_kw(b, fallback='outcome')} -- the thing between",
-        lambda a, b: f"Half {_kw(a, fallback='intent')}, half {_kw(b, fallback='mistake')} -- which half wins?",
-        lambda a, b: f"{_v(a).capitalize()} {_kw(a)} until {_kw(b, fallback='material')} answers back" if a.get('verb') and a.get('keywords') else None,
+        lambda a, b: f"Half {_tn(a)}, half {_tn(b)} -- commit to neither",
+        lambda a, b: f"Graft the {_tn(b)} onto the {_tn(a)}. Where does it take?",
+        lambda a, b: f"Make a {_tn(a)} entirely from {_tn(b)}",
+        lambda a, b: f"{_v(a).capitalize()} the {_tn(b)} and the {_tn(a)} at once" if a.get('verb') else None,
+        lambda a, b: f"Breed {_tn(a)} with {_tn(b)}. Raise the runt",
+        lambda a, b: f"Sew the {_tn(a)} to the {_tn(b)}. Follow the seam",
+        lambda a, b: f"Find where {_tn(a)} becomes {_tn(b)}. Work only there",
+        lambda a, b: f"What would the child of {_tn(a)} and {_tn(b)} rebel against?",
     ],
     'translate': [
-        lambda a, b: f"{_v(a).capitalize()} it in the language of {_kw(b, fallback='body')}" if a.get('verb') else None,
-        lambda a, b: f"How would {_kw(b, fallback='child')} express {_kw(a, fallback='urgency')}?",
-        lambda a, b: f"Rewrite {_kw(a, fallback='rules')} using only {_kw(b, fallback='gestures')}",
-        lambda a, b: f"What does {_kw(a, fallback='sound')} become when {_kw(b, fallback='urgency')} takes over?",
-        lambda a, b: f"Misinterpret {_kw(a, fallback='original')} on purpose",
-        lambda a, b: f"Say {_kw(a, fallback='difficult part')} in the voice of {_kw(b, fallback='critic')}",
-        lambda a, b: f"{_kw(a, fallback='form').capitalize()} translated badly is still {_kw(b, fallback='form')}",
-        lambda a, b: f"{_v(b).capitalize()} {_kw(a)} into {_kw(b, fallback='medium')}" if b.get('verb') else None,
+        lambda a, b: f"Say {_tn(a)} in the language of {_tn(b)}",
+        lambda a, b: f"Misinterpret the {_tn(a)} on purpose. Keep the error",
+        lambda a, b: f"Translate {_tn(b)} into {_tn(a)}. Lose something on the way",
+        lambda a, b: f"{_v(a).capitalize()} it as if {_tn(b)} were the only alphabet" if a.get('verb') else None,
+        lambda a, b: f"Whisper the {_tn(a)} through {_tn(b)}. What distorts?",
+        lambda a, b: f"Rewrite the {_tn(a)} using only {_tn(b)}",
+        lambda a, b: f"What accent does {_tn(b)} give to {_tn(a)}?",
+        lambda a, b: f"Write instructions for {_tn(a)} in a language you forgot",
     ],
     'invert': [
-        lambda a, b: f"{_v(a).capitalize()} what hides. {_v(b).capitalize()} what reveals" if a.get('verb') and b.get('verb') else None,
-        lambda a, b: f"Do the opposite of {_kw(a, fallback='order')}. Keep {_kw(b, fallback='residue')}",
-        lambda a, b: f"{_kw(a, fallback='precision').capitalize()} pretends to be {_kw(b, fallback='roughness')}. Call it out",
-        lambda a, b: f"The wrong way to {_v(a)} {_kw(b)} is the right way" if a.get('verb') else None,
-        lambda a, b: f"Turn {_kw(a, fallback='strength')} into {_kw(b, fallback='weakness')} -- is it better?",
-        lambda a, b: f"Everything you know about {_kw(a, fallback='form')} is wrong",
-        lambda a, b: f"Reverse {_kw(a, fallback='process')}. Start from {_kw(b, fallback='end')}",
-        lambda a, b: f"The opposite of {_kw(a, fallback='precision')} is not {_kw(b, fallback='roughness')}",
+        lambda a, b: f"Do the opposite of {_tn(a)}. Notice what you protect",
+        lambda a, b: f"Turn the {_tn(a)} inside out. Is {_tn(b)} still there?",
+        lambda a, b: f"The wrong way to handle the {_tn(a)} is the right way",
+        lambda a, b: f"Everything you know about the {_tn(a)} is wrong. Start over",
+        lambda a, b: f"Reverse the {_tn(a)}. Start from {_tn(b)}",
+        lambda a, b: f"Swap the {_tn(a)} and the {_tn(b)}. Which improved?",
+        lambda a, b: f"{_v(a).capitalize()} it backwards. What does {_tn(b)} reveal?" if a.get('verb') else None,
+        lambda a, b: f"The {_tn(a)} is hiding behind the {_tn(b)}. Expose it",
     ],
     'metaphor': [
-        lambda a, b: f"Think about {_kw(a, fallback='work')} while you {_v(b)}" if b.get('verb') else None,
-        lambda a, b: f"{_kw(a, fallback='sound').capitalize()} is a container for {_kw(b, fallback='raw material')}",
-        lambda a, b: f"The map says {_kw(a, fallback='safety')}. The territory says {_kw(b, fallback='danger')}",
-        lambda a, b: f"Treat {_kw(a, fallback='work')} as if it were {_kw(b, fallback='opposite')}",
-        lambda a, b: f"What orbit does {_kw(a, fallback='form')} trace around {_kw(b, fallback='center')}?",
-        lambda a, b: f"{_kw(a, fallback='rhythm').capitalize()} is the structure. {_kw(b, fallback='space').capitalize()} is the pause",
-        lambda a, b: f"If {_kw(a, fallback='sound')} had weight, how heavy would {_kw(b, fallback='feeling')} make it?",
-        lambda a, b: f"Carry {_kw(a, fallback='work')} like a secret",
+        lambda a, b: f"Carry the {_tn(a)} like a secret through the {_tn(b)}",
+        lambda a, b: f"What orbit does {_tn(a)} trace around {_tn(b)}?",
+        lambda a, b: f"Treat the {_tn(a)} as if it were alive and angry",
+        lambda a, b: f"If the {_tn(a)} could speak, what would it say about the {_tn(b)}?",
+        lambda a, b: f"Weigh the {_tn(a)} against the {_tn(b)}. Which is heavier?",
+        lambda a, b: f"Dream of {_tn(a)} while you {_v(b)} the {_tn(b)}" if b.get('verb') else None,
+        lambda a, b: f"The {_tn(a)} is a door. The {_tn(b)} is behind it",
+        lambda a, b: f"What would {_tn(a)} look like from inside the {_tn(b)}?",
     ],
     'collide': [
-        lambda a, b: f"Crash {_kw(a, fallback='order')} into {_kw(b, fallback='accident')} -- use what survives",
-        lambda a, b: f"{_v(a).capitalize()} {_kw(a, fallback='form')} at {_kw(b, fallback='speed')}. Keep the shrapnel" if a.get('verb') else None,
-        lambda a, b: f"Maximum velocity: {_kw(a, fallback='signal')} meets {_kw(b, fallback='static')}",
-        lambda a, b: f"The debris of {_kw(a, fallback='method')} and {_kw(b, fallback='instinct')} is the material",
-        lambda a, b: f"Stack {_kw(a, fallback='layers')}. Remove {_kw(b, fallback='foundation')}",
-        lambda a, b: f"Force {_kw(a, fallback='elements')} together. Keep only what fused",
-        lambda a, b: f"{_kw(a, fallback='form').capitalize()} and {_kw(b, fallback='content')} collide. Pick through the wreckage",
-        lambda a, b: f"Throw {_kw(a, fallback='precision')} against {_kw(b, fallback='opposite')}",
+        lambda a, b: f"Crash {_tn(a)} into {_tn(b)}. Use what survives",
+        lambda a, b: f"Throw {_tn(a)} at {_tn(b)} at full speed. Keep the shrapnel",
+        lambda a, b: f"Pick through the wreckage of {_tn(a)} and {_tn(b)}",
+        lambda a, b: f"Stack {_tn(a)} on {_tn(b)}. Remove the load-bearing one",
+        lambda a, b: f"Force {_tn(a)} and {_tn(b)} together. Keep only what fused",
+        lambda a, b: f"Detonate the {_tn(a)} inside the {_tn(b)}. What survived?",
+        lambda a, b: f"Drag {_tn(b)} across {_tn(a)} until something catches fire",
+        lambda a, b: f"The {_tn(a)} and {_tn(b)} collided. Sift through the dust",
     ],
 }
 
@@ -343,12 +350,42 @@ TRADITION_SEM = {
 
 _DEFAULT_SEM = {'mood': 'oracular', 'action': 'observe'}
 
+# Concrete noun pools per tradition — used in template layer instead of keywords
+TRADITION_NOUNS = {
+    'Eno/Schmidt': ['process', 'accident', 'edge', 'garden', 'tape', 'wire', 'gap'],
+    'SITUATIONIST INTERNATIONAL': ['map', 'billboard', 'route', 'spectacle', 'wall', 'street'],
+    'FLUXUS': ['postcard', 'instruction', 'score', 'box', 'title', 'event'],
+    'CONCEPTUAL ART': ['system', 'list', 'rule', 'sentence', 'document', 'plan'],
+    'PERFORMANCE ART': ['body', 'gesture', 'skin', 'breath', 'floor', 'hour'],
+    'INSTITUTIONAL CRITIQUE': ['frame', 'label', 'wall', 'receipt', 'name', 'contract'],
+    'RELATIONAL AESTHETICS': ['table', 'meal', 'invitation', 'guest', 'gift', 'conversation'],
+    'POST-INTERNET': ['file', 'screen', 'pixel', 'thumbnail', 'feed', 'copy'],
+    'DECOLONIAL THEORY': ['border', 'tongue', 'root', 'wound', 'center', 'margin'],
+    'FEMINIST ART': ['thread', 'kitchen', 'labor', 'mirror', 'care', 'needle'],
+    'SOUND STUDIES / DEEP LISTENING': ['room', 'echo', 'breath', 'field', 'hum', 'ground'],
+    'GLITCH THEORY': ['signal', 'artifact', 'codec', 'noise', 'pixel', 'static'],
+    'NEW MATERIALISM': ['grain', 'surface', 'ecology', 'mineral', 'hum', 'fossil'],
+    'HAUNTOLOGY': ['tape', 'ghost', 'memory', 'ruin', 'signal', 'dust'],
+    'AFRO-FUTURISM': ['orbit', 'drum', 'void', 'code', 'ship', 'rhythm'],
+    'DADA / SURREALISM': ['scissors', 'dream', 'hat', 'accident', 'mirror', 'clock'],
+    'MINIMALISM': ['grid', 'silence', 'edge', 'gap', 'phase', 'tone'],
+    'NOISE / INDUSTRIAL': ['metal', 'machine', 'concrete', 'wire', 'pressure', 'teeth'],
+    'PUNK / DIY': ['tape', 'dirt', 'stage', 'fist', 'demo', 'wall'],
+    'SYSTEMS / GENERATIVE': ['rule', 'seed', 'loop', 'pattern', 'clock', 'chain'],
+    'LAND ART / ENTROPY': ['dirt', 'stone', 'weather', 'root', 'fossil', 'rust'],
+    'DESIGN / TYPOGRAPHY': ['grid', 'margin', 'weight', 'space', 'surface', 'ink'],
+    'CROSS-MODAL': ['smell', 'weight', 'temperature', 'tongue', 'skin', 'color'],
+    'DANGER': ['wound', 'mirror', 'edge', 'confession', 'nerve', 'bone'],
+    'Mutation': ['fragment', 'residue', 'debris', 'chimera', 'wreckage', 'splice'],
+}
+_DEFAULT_NOUNS = TRADITION_NOUNS['Eno/Schmidt']
+
 SEM_TEMPLATES = [
     lambda sa, sb: f"Find the {sa['mood']} form of {sb['action']}",
     lambda sa, sb: f"{sb['action'].capitalize()} with {sa['mood']} intensity",
     lambda sa, sb: f"What happens when {sa['mood']} meets {sb['mood']}?",
     lambda sa, sb: f"{sa['action'].capitalize()} until it becomes {sb['mood']}",
-    lambda sa, sb: f"The {sa['mood']} way to {sb['action']}",
+    lambda sa, sb: f"Take the {sa['mood']} approach to {sb['action']}",
     lambda sa, sb: f"{sa['action'].capitalize()} what is {sb['mood']}. {sb['action'].capitalize()} what is {sa['mood']}",
     lambda sa, sb: f"Be {sa['mood']} about {sb['action']}. Be {sb['mood']} about {sa['action']}",
     lambda sa, sb: f"{sa['action'].capitalize()} like you mean it. {sb['action'].capitalize()} like you don't",
@@ -441,6 +478,10 @@ def mutate(card_a: str, card_b: str, directive: str,
     pa = parse_card(card_a)
     pb = parse_card(card_b)
 
+    # Tradition noun pools for template layer
+    nouns_a = TRADITION_NOUNS.get(tradition_a, _DEFAULT_NOUNS)
+    nouns_b = TRADITION_NOUNS.get(tradition_b, _DEFAULT_NOUNS)
+
     # Layer 1: Markov
     seeds = (pa.get('keywords', []) or []) + (pb.get('keywords', []) or [])
     if strategy == 'devour' and pa.get('verb'):
@@ -463,6 +504,10 @@ def mutate(card_a: str, card_b: str, directive: str,
         for tmpl, tid in indexed:
             if tid in _recent_template_ids:
                 continue
+            # Re-pick tradition nouns for each attempt (variety + no collision)
+            pa['_tn'] = random.choice(nouns_a)
+            nb_candidates = [n for n in nouns_b if n != pa['_tn']]
+            pb['_tn'] = random.choice(nb_candidates or nouns_b)
             result = tmpl(pa, pb)
             if result and _quality_gate(result):
                 final = result[0].upper() + result[1:]

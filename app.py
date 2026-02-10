@@ -402,14 +402,15 @@ class App:
 
     def _draw_card_frame(self, cx, top, card_w, card_h, face_up):
         """Draw a box-drawing card frame."""
-        left = cx - card_w // 2
         inner_chars = max(1, (card_w - 20) // CHAR_W_APPROX)
 
         border_color = TEXT if face_up else BORDER
 
-        # Top border
+        # Top border — center based on actual rendered width
         top_line = BOX_TL + BOX_H * inner_chars + BOX_TR
         top_surf = self._render(self.font_md, top_line, border_color)
+        frame_w = top_surf.get_width()
+        left = cx - frame_w // 2
         self.screen.blit(top_surf, (left, top))
 
         # Bottom border
