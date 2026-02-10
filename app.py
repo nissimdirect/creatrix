@@ -119,6 +119,7 @@ class App:
         self.card_b = None
         self.directive = None
         self.mutation_result = None
+        self.show_equation = False  # Toggle with I key
 
         # Animation
         self.fade_alpha = 0.0
@@ -264,15 +265,13 @@ class App:
                     self.state = STATE_IDLE
                     self.current_card = None
         else:
-            # Mutate mode: staggered reveal (6 elements: A, ×, B, sep, HOW, MUTATION)
+            # Mutate mode: fade in mutation result directly (index 5)
             if self.state == STATE_REVEALING:
-                for i in range(6):
-                    line_start = i * STAGGER_DELAY
-                    if elapsed > line_start:
-                        progress = min((elapsed - line_start) / FADE_DURATION, 1.0)
-                        self.mutate_line_alphas[i] = progress
-                if all(a >= 1.0 for a in self.mutate_line_alphas):
+                progress = min(elapsed / FADE_DURATION, 1.0)
+                self.mutate_line_alphas[5] = progress
+                if progress >= 1.0:
                     self.state = STATE_REVEALED
+                    self.show_equation = False  # Reset on new mutation
 
     # ── Render ───────────────────────────────────────────────────────────
 
@@ -303,25 +302,28 @@ class App:
     def _draw_outer_frame(self, w, h):
         """Draw the outer terminal box-drawing frame."""
         margin = 8
+        # Use actual character width instead of approximation
+        char_w = self._text_w(self.font_sm, BOX_H)
+        inner_chars = max(1, (w - 2 * margin) // char_w - 2)
         # Top
-        top_line = BOX_TL + BOX_H * ((w - 2 * margin) // CHAR_W_APPROX - 2) + BOX_TR
+        top_line = BOX_TL + BOX_H * inner_chars + BOX_TR
         top_surf = self._render(self.font_sm, top_line, BORDER)
         self.screen.blit(top_surf, (margin, margin))
 
         # Bottom
-        bot_line = BOX_BL + BOX_H * ((w - 2 * margin) // CHAR_W_APPROX - 2) + BOX_BR
+        bot_line = BOX_BL + BOX_H * inner_chars + BOX_BR
         bot_surf = self._render(self.font_sm, bot_line, BORDER)
         self.screen.blit(bot_surf, (margin, h - margin - self._line_h(self.font_sm)))
 
         # Sides
         lh = self._line_h(self.font_sm)
+        frame_w = top_surf.get_width()
         y = margin + lh
         while y < h - margin - lh:
             left_surf = self._render(self.font_sm, BOX_V, BORDER)
             self.screen.blit(left_surf, (margin, y))
             right_surf = self._render(self.font_sm, BOX_V, BORDER)
             rw = self._text_w(self.font_sm, BOX_V)
-            frame_w = self._text_w(self.font_sm, top_line)
             self.screen.blit(right_surf, (margin + frame_w - rw, y))
             y += lh
 
@@ -339,8 +341,9 @@ class App:
             draw_color = TEXT_GHOST
             mutate_color = TEXT_BRT
 
-        # Horizontal separator below tabs
-        sep_line = BOX_T_RIGHT + BOX_H * ((w - 40) // CHAR_W_APPROX) + BOX_T_LEFT
+        # Horizontal separator below tabs — use actual char width
+        sep_char_w = self._text_w(self.font_sm, BOX_H)
+        sep_line = BOX_T_RIGHT + BOX_H * ((w - 40) // sep_char_w) + BOX_T_LEFT
         sep_surf = self._render(self.font_sm, sep_line, BORDER)
 
         draw_surf = self._render(self.font_md, draw_label, draw_color)
@@ -380,6 +383,9 @@ class App:
         action = "draw" if self.mode == MODE_DRAW else "mutate"
         mode_name = "mutate" if self.mode == MODE_DRAW else "draw"
         hint = f"[ SPACE ] {action}  │  [ M ] {mode_name}  │  {self.deck_size}"
+        if self.mode == MODE_MUTATE and self.state == STATE_REVEALED:
+            eq_label = "hide equation" if self.show_equation else "show equation"
+            hint += f"  │  [ I ] {eq_label}"
         hint_surf = self._render(self.font_xs, hint, TEXT_DIM)
         self.screen.blit(hint_surf, (w // 2 - hint_surf.get_width() // 2, h - 32))
 
@@ -488,77 +494,67 @@ class App:
 
         lm = max(40, w // 10)
         content_w = w - 2 * lm
-        y = 130
-
+        cx = w // 2
         alphas = self.mutate_line_alphas
 
-        # Card A
-        if alphas[0] > 0:
-            y = self._draw_mutate_card("A", self.card_a, lm, y, content_w, alphas[0])
-        y += 12
+        # ── MUTATION RESULT (always shown, centered, prominent) ──
+        y = 160
+        if alphas[5] > 0 and self.mutation_result:
+            # Label
+            label_text = "═══ MUTATION ═══"
+            label_color = self._fade_color(TEXT_DIM, alphas[5])
+            label_surf = self._render(self.font_sm, label_text, label_color)
+            self.screen.blit(label_surf, (cx - label_surf.get_width() // 2, y))
+            y += 24
 
-        # × symbol
-        if alphas[1] > 0:
-            sym_color = self._fade_color(TEXT_DIM, alphas[1])
-            sym_surf = self._render(self.font_md, "×", sym_color)
-            self.screen.blit(sym_surf, (lm + 20, y))
-        y += 22
+            # Mutation text (large, bright)
+            mut_color = self._fade_color(TEXT_BRT, alphas[5])
+            mut_lines = self._wrap(self.mutation_result['text'], self.font_lg, content_w - 20)
+            lh = self._line_h(self.font_lg)
+            for i, line in enumerate(mut_lines):
+                surf = self._render(self.font_lg, line, mut_color)
+                self.screen.blit(surf, (cx - surf.get_width() // 2, y + i * lh))
+            y += len(mut_lines) * lh + 16
 
-        # Card B
-        if alphas[2] > 0:
-            y = self._draw_mutate_card("B", self.card_b, lm, y, content_w, alphas[2])
-        y += 16
-
-        # Separator bar
-        if alphas[3] > 0:
-            bar_color = self._fade_color(TEXT_DIM, alphas[3])
-            bar_text = "▓" * (content_w // CHAR_W_APPROX)
-            bar_surf = self._render(self.font_sm, bar_text, bar_color)
+        # ── EQUATION (hidden by default, toggled with I key) ──
+        if self.show_equation and self.state == STATE_REVEALED:
+            # Separator
+            sep_color = self._fade_color(TEXT_DIM, 1.0)
+            bar_char_w = self._text_w(self.font_sm, "▓")
+            bar_text = "▓" * max(1, content_w // max(bar_char_w, 1))
+            bar_surf = self._render(self.font_sm, bar_text, sep_color)
             self.screen.blit(bar_surf, (lm, y))
-        y += 20
+            y += 16
 
-        # HOW: Directive
-        if alphas[4] > 0:
-            how_color = self._fade_color(UV_VIOLET, alphas[4])
+            # Card A
+            y = self._draw_mutate_card("A", self.card_a, lm, y, content_w, 1.0)
+            y += 8
+
+            # × symbol
+            sym_surf = self._render(self.font_md, "×", TEXT_DIM)
+            self.screen.blit(sym_surf, (lm + 20, y))
+            y += 20
+
+            # Card B
+            y = self._draw_mutate_card("B", self.card_b, lm, y, content_w, 1.0)
+            y += 12
+
+            # HOW: Directive
+            how_color = UV_VIOLET
             how_label = self._render(self.font_md, "HOW:", how_color)
             self.screen.blit(how_label, (lm, y))
-            y += 24
+            y += 22
 
             dir_lines = self._wrap(self.directive["card"], self.font_md, content_w - 20)
             lh = self._line_h(self.font_md)
             for i, line in enumerate(dir_lines):
                 surf = self._render(self.font_md, line, how_color)
                 self.screen.blit(surf, (lm + 10, y + i * lh))
-            y += len(dir_lines) * lh + 6
+            y += len(dir_lines) * lh + 4
 
             trad = f"[{self.directive['tradition'].upper()}]"
-            trad_surf = self._render(self.font_xs, trad, self._fade_color(TEXT_GHOST, alphas[4]))
+            trad_surf = self._render(self.font_xs, trad, TEXT_GHOST)
             self.screen.blit(trad_surf, (lm + 10, y))
-
-        # Mutation result
-        if alphas[5] > 0 and self.mutation_result:
-            y += 24
-            # Separator bar
-            result_bar_color = self._fade_color(TEXT_DIM, alphas[5])
-            bar_text = "▓" * (content_w // CHAR_W_APPROX)
-            bar_surf = self._render(self.font_sm, bar_text, result_bar_color)
-            self.screen.blit(bar_surf, (lm, y))
-            y += 16
-
-            # Label
-            label_text = "═══ MUTATION ═══"
-            label_color = self._fade_color(TEXT_DIM, alphas[5])
-            label_surf = self._render(self.font_sm, label_text, label_color)
-            self.screen.blit(label_surf, (w // 2 - label_surf.get_width() // 2, y))
-            y += 20
-
-            # Mutation text
-            mut_color = self._fade_color(TEXT_BRT, alphas[5])
-            mut_lines = self._wrap(self.mutation_result['text'], self.font_md, content_w - 20)
-            lh = self._line_h(self.font_md)
-            for i, line in enumerate(mut_lines):
-                surf = self._render(self.font_md, line, mut_color)
-                self.screen.blit(surf, (w // 2 - surf.get_width() // 2, y + i * lh))
 
     def _draw_mutate_card(self, label, card_data, x, y, max_w, alpha):
         label_color = self._fade_color(RED_CORE, alpha)
@@ -602,6 +598,9 @@ class App:
                         self.handle_action()
                     elif event.key == pygame.K_m:
                         self.toggle_mode()
+                    elif event.key == pygame.K_i:
+                        if self.mode == MODE_MUTATE and self.state == STATE_REVEALED:
+                            self.show_equation = not self.show_equation
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         pos = event.pos

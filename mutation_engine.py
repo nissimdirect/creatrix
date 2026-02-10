@@ -463,6 +463,82 @@ def _record(text: str) -> None:
         _recent.pop(0)
 
 
+# ── Variant Engine (post-processing) ──────────────────────────────────
+
+def _variant_gate(text: str) -> bool:
+    """Lighter quality gate for post-processed variants."""
+    if not text:
+        return False
+    words = text.split()
+    if len(words) < 4 or len(words) > 15:
+        return False
+    real = sum(1 for w in words if len(re.sub(r'[^a-z]', '', w.lower())) > 2)
+    if real < 3:
+        return False
+    lower = text.lower()
+    if any(f in lower for f in FILLER):
+        return False
+    for existing in _existing_lower:
+        if _levenshtein(lower, existing) < 5:
+            return False
+    if lower in _recent:
+        return False
+    return True
+
+
+def _pick_variant(text: str, tn_a: str, tn_b: str) -> str:
+    """Generate up to 6 variants, pick one randomly.
+
+    Variants: raw, first-clause, second-clause, inverted, compressed, negated.
+    """
+    variants = [text]  # E: raw original
+
+    # A/B: Split at natural breaks → first and second clauses
+    for sep in ['. ', ' -- ', ', ']:
+        if sep in text:
+            parts = text.split(sep, 1)
+            first_half = parts[0].strip().rstrip('.')
+            second_half = parts[1].strip()
+            if len(first_half.split()) >= 4:
+                variants.append(first_half)
+            if second_half and len(second_half.split()) >= 4:
+                variants.append(second_half[0].upper() + second_half[1:])
+            break
+
+    # D: Inverted — swap the two tradition nouns
+    if tn_a and tn_b and tn_a != tn_b:
+        lower = text.lower()
+        if tn_a in lower and tn_b in lower:
+            inv = re.sub(r'\b' + re.escape(tn_a) + r'\b', '\x00', text, flags=re.I)
+            inv = re.sub(r'\b' + re.escape(tn_b) + r'\b', tn_a, inv, flags=re.I)
+            inv = inv.replace('\x00', tn_b)
+            if inv != text:
+                variants.append(inv)
+
+    # C: Compressed — drop articles before tradition nouns
+    compressed = text
+    for noun in [tn_a, tn_b]:
+        if noun:
+            compressed = re.sub(r'\bthe\s+(' + re.escape(noun) + r')\b', r'\1',
+                                compressed, flags=re.I)
+    if compressed != text and len(compressed.split()) >= 4:
+        variants.append(compressed)
+
+    # F: Negated wildcard
+    words = text.split()
+    first_clean = re.sub(r'[^a-z]', '', words[0].lower())
+    if first_clean in IMP_VERBS:
+        negated = "Don't " + words[0].lower() + " " + " ".join(words[1:])
+        variants.append(negated)
+
+    # Filter and pick
+    valid = [v for v in variants if _variant_gate(v)]
+    if not valid:
+        return text
+    chosen = random.choice(valid)
+    return chosen[0].upper() + chosen[1:]
+
+
 # ── Main Pipeline ───────────────────────────────────────────────────────
 
 def mutate(card_a: str, card_b: str, directive: str,
@@ -490,7 +566,8 @@ def mutate(card_a: str, card_b: str, directive: str,
         random.shuffle(seeds)
     result = _markov_generate(seeds, 10)
     if result and _quality_gate(result):
-        final = result[0].upper() + result[1:]
+        raw = result[0].upper() + result[1:]
+        final = _pick_variant(raw, '', '')
         _record(final)
         return {'text': final, 'layer': 'markov'}
 
@@ -510,7 +587,8 @@ def mutate(card_a: str, card_b: str, directive: str,
             pb['_tn'] = random.choice(nb_candidates or nouns_b)
             result = tmpl(pa, pb)
             if result and _quality_gate(result):
-                final = result[0].upper() + result[1:]
+                raw = result[0].upper() + result[1:]
+                final = _pick_variant(raw, pa.get('_tn', ''), pb.get('_tn', ''))
                 _record(final)
                 _recent_template_ids.append(tid)
                 if len(_recent_template_ids) > 5:
@@ -525,7 +603,8 @@ def mutate(card_a: str, card_b: str, directive: str,
     for tmpl in sem_shuffled:
         result = tmpl(sem_a, sem_b)
         if _quality_gate(result):
-            final = result[0].upper() + result[1:]
+            raw = result[0].upper() + result[1:]
+            final = _pick_variant(raw, '', '')
             _record(final)
             return {'text': final, 'layer': 'semantic'}
 
