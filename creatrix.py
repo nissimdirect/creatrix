@@ -235,6 +235,32 @@ def collision(args):
     print("  What happens when these two collide?")
 
 
+def mutate_cli(args):
+    """Mutation mode: combine Card A + Card B via a directive to create a novel instruction."""
+    result = get_mutation()
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+        return
+
+    print("  CARD A:")
+    print(f"    {result['card_a']['card']}")
+    if args.tradition:
+        print(f"    [{result['card_a']['tradition']}]")
+    print()
+    print("  CARD B:")
+    print(f"    {result['card_b']['card']}")
+    if args.tradition:
+        print(f"    [{result['card_b']['tradition']}]")
+    print()
+    print("  HOW:")
+    print(f"    {result['directive']}")
+    print()
+    print("  ═══ MUTATION ═══")
+    print(f"    {result['mutation']}")
+    print()
+
+
 def list_traditions(args):
     """List all creative traditions in the deck."""
     print("  CREATRIX — CREATIVE TRADITIONS")
@@ -326,6 +352,41 @@ def get_collision():
     return None
 
 
+def get_mutation():
+    """Return a mutation: Card A + Card B + Directive → novel instruction.
+
+    Returns dict with 'card_a', 'card_b', 'directive', 'mutation', 'layer', 'strategy'.
+    The mutation engine must be initialized first (calls build_markov automatically).
+    """
+    import mutation_engine
+    from directives import DIRECTIVES
+
+    originals = load_strategies(ORIGINALS_FILE)
+    mutants_tagged = load_mutants_with_traditions(MUTANTS_FILE)
+    all_cards = originals + [s for s, _ in mutants_tagged]
+    all_cards_tagged = [(s, "Eno/Schmidt") for s in originals] + list(mutants_tagged)
+
+    # Ensure model is built
+    if not mutation_engine._model_built:
+        mutation_engine.build_markov(all_cards)
+
+    a_card, a_trad = random.choice(all_cards_tagged)
+    b_card, b_trad = random.choice(all_cards_tagged)
+    d_text, _ = random.choice(DIRECTIVES)
+
+    result = mutation_engine.mutate(a_card, b_card, d_text, a_trad, b_trad)
+    strategy = mutation_engine.classify_directive(d_text)
+
+    return {
+        "card_a": {"card": a_card, "tradition": a_trad},
+        "card_b": {"card": b_card, "tradition": b_trad},
+        "directive": d_text,
+        "mutation": result["text"],
+        "layer": result["layer"],
+        "strategy": strategy,
+    }
+
+
 def get_cards(n=3, pool="all"):
     """Return n random card dicts."""
     originals = load_strategies(ORIGINALS_FILE)
@@ -355,6 +416,7 @@ def main():
     parser.add_argument("--danger", action="store_true", help="Danger cards only")
     parser.add_argument("--tradition", action="store_true", help="Show tradition for each card")
     parser.add_argument("--collision", action="store_true", help="Smart collision mode")
+    parser.add_argument("--mutate", action="store_true", help="Mutation mode: combine 2 cards via directive")
     parser.add_argument("--list-traditions", action="store_true", help="List all 23 traditions")
     parser.add_argument("--stats", action="store_true", help="Deck statistics")
     parser.add_argument("--json", action="store_true", help="JSON output (for integration)")
@@ -367,6 +429,8 @@ def main():
         stats(args)
     elif args.collision:
         collision(args)
+    elif args.mutate:
+        mutate_cli(args)
     else:
         draw(args)
 
