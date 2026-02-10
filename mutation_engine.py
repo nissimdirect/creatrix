@@ -558,18 +558,8 @@ def mutate(card_a: str, card_b: str, directive: str,
     nouns_a = TRADITION_NOUNS.get(tradition_a, _DEFAULT_NOUNS)
     nouns_b = TRADITION_NOUNS.get(tradition_b, _DEFAULT_NOUNS)
 
-    # Layer 1: Markov
-    seeds = (pa.get('keywords', []) or []) + (pb.get('keywords', []) or [])
-    if strategy == 'devour' and pa.get('verb'):
-        seeds.insert(0, pa['verb'])
-    if strategy == 'collide':
-        random.shuffle(seeds)
-    result = _markov_generate(seeds, 10)
-    if result and _quality_gate(result):
-        raw = result[0].upper() + result[1:]
-        final = _pick_variant(raw, '', '')
-        _record(final)
-        return {'text': final, 'layer': 'markov'}
+    # Layer 1: Markov — DISABLED (produces broken grammar too often)
+    # Goes straight to template layer which produces consistently cleaner output.
 
     # Layer 2: Templates (try multiple strategies if primary fails)
     strategy_order = [strategy] + [s for s in TEMPLATES if s != strategy]

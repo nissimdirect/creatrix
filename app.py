@@ -328,18 +328,10 @@ class App:
             y += lh
 
     def _draw_mode_tabs(self, w):
-        """Draw clickable mode tabs at top."""
+        """Draw mode tabs at top. MUTATE is feature flagged off."""
         y = 30
-        if self.mode == MODE_DRAW:
-            draw_label = "[▓ DRAW ▓]"
-            mutate_label = "[ MUTATE ]"
-            draw_color = TEXT_BRT
-            mutate_color = TEXT_GHOST
-        else:
-            draw_label = "[ DRAW ]"
-            mutate_label = "[▓ MUTATE ▓]"
-            draw_color = TEXT_GHOST
-            mutate_color = TEXT_BRT
+        draw_label = "[▓ DRAW ▓]"
+        draw_color = TEXT_BRT
 
         # Horizontal separator below tabs — use actual char width
         sep_char_w = self._text_w(self.font_sm, BOX_H)
@@ -347,17 +339,14 @@ class App:
         sep_surf = self._render(self.font_sm, sep_line, BORDER)
 
         draw_surf = self._render(self.font_md, draw_label, draw_color)
-        mutate_surf = self._render(self.font_md, mutate_label, mutate_color)
 
         x_draw = 30
-        x_mutate = x_draw + draw_surf.get_width() + 20
-
         self.screen.blit(draw_surf, (x_draw, y))
-        self.screen.blit(mutate_surf, (x_mutate, y))
 
         # Store tab rects for click detection
         self._tab_draw_rect = pygame.Rect(x_draw, y, draw_surf.get_width(), draw_surf.get_height())
-        self._tab_mutate_rect = pygame.Rect(x_mutate, y, mutate_surf.get_width(), mutate_surf.get_height())
+        # MUTATE tab hidden — feature flagged off, revisit week of 2026-02-16
+        self._tab_mutate_rect = pygame.Rect(0, 0, 0, 0)
 
         # Separator
         self.screen.blit(sep_surf, (12, y + self._line_h(self.font_md) + 2))
@@ -380,12 +369,7 @@ class App:
 
     def _draw_hints(self, w, h):
         """Draw bottom hint bar."""
-        action = "draw" if self.mode == MODE_DRAW else "mutate"
-        mode_name = "mutate" if self.mode == MODE_DRAW else "draw"
-        hint = f"[ SPACE ] {action}  │  [ M ] {mode_name}  │  {self.deck_size}"
-        if self.mode == MODE_MUTATE and self.state == STATE_REVEALED:
-            eq_label = "hide equation" if self.show_equation else "show equation"
-            hint += f"  │  [ I ] {eq_label}"
+        hint = f"[ SPACE ] draw  │  {self.deck_size}"
         hint_surf = self._render(self.font_xs, hint, TEXT_DIM)
         self.screen.blit(hint_surf, (w // 2 - hint_surf.get_width() // 2, h - 32))
 
@@ -596,11 +580,12 @@ class App:
                         running = False
                     elif event.key == pygame.K_SPACE:
                         self.handle_action()
-                    elif event.key == pygame.K_m:
-                        self.toggle_mode()
-                    elif event.key == pygame.K_i:
-                        if self.mode == MODE_MUTATE and self.state == STATE_REVEALED:
-                            self.show_equation = not self.show_equation
+                    # MUTATE mode feature flagged off — revisit week of 2026-02-16
+                    # elif event.key == pygame.K_m:
+                    #     self.toggle_mode()
+                    # elif event.key == pygame.K_i:
+                    #     if self.mode == MODE_MUTATE and self.state == STATE_REVEALED:
+                    #         self.show_equation = not self.show_equation
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         pos = event.pos
