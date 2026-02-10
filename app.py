@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from creatrix import load_strategies, load_mutants_with_traditions
 from creatrix import ORIGINALS_FILE, MUTANTS_FILE
 from directives import DIRECTIVES
+import mutation_engine
 
 # ── Terminal Palette (Pop Chaos Design System) ───────────────────────────
 # The terminal IS the design. Yellowish-green on charcoal.
@@ -100,6 +101,9 @@ class App:
         self.deck_size = len(self.all_cards)
         self.mutate_pool = self.all_cards + DIRECTIVES
 
+        # Build mutation engine Markov model
+        mutation_engine.build_markov([card for card, _ in self.all_cards])
+
         # State
         self.mode = MODE_DRAW
         self.state = STATE_IDLE
@@ -114,10 +118,11 @@ class App:
         self.card_a = None
         self.card_b = None
         self.directive = None
+        self.mutation_result = None
 
         # Animation
         self.fade_alpha = 0.0
-        self.mutate_line_alphas = [0.0] * 5  # A, ×, B, separator, HOW
+        self.mutate_line_alphas = [0.0] * 6  # A, ×, B, separator, HOW, MUTATION
 
     def _set_macos_icon(self):
         """Set dock icon on macOS via Cocoa. Must be called AFTER pygame.init."""
@@ -183,10 +188,17 @@ class App:
         self.current_card, self.current_tradition = random.choice(self.all_cards)
 
     def _pick_mutate(self):
-        picks = random.sample(self.mutate_pool, 3)
-        self.card_a = {"card": picks[0][0], "tradition": picks[0][1]}
-        self.card_b = {"card": picks[1][0], "tradition": picks[1][1]}
-        self.directive = {"card": picks[2][0], "tradition": picks[2][1]}
+        # Pick A and B from cards, directive from DIRECTIVES
+        card_picks = random.sample(self.all_cards, 2)
+        dir_pick = random.choice(DIRECTIVES)
+        self.card_a = {"card": card_picks[0][0], "tradition": card_picks[0][1]}
+        self.card_b = {"card": card_picks[1][0], "tradition": card_picks[1][1]}
+        self.directive = {"card": dir_pick[0], "tradition": dir_pick[1]}
+        # Generate mutation
+        self.mutation_result = mutation_engine.mutate(
+            self.card_a["card"], self.card_b["card"], self.directive["card"],
+            self.card_a["tradition"], self.card_b["tradition"],
+        )
 
     # ── Input ────────────────────────────────────────────────────────────
 
@@ -221,7 +233,7 @@ class App:
             self._pick_mutate()
             self.state = STATE_REVEALING
             self.anim_start = time.time()
-            self.mutate_line_alphas = [0.0] * 5
+            self.mutate_line_alphas = [0.0] * 6
 
     def toggle_mode(self):
         if self.state == STATE_REVEALING or self.state == STATE_HIDING:
@@ -252,9 +264,9 @@ class App:
                     self.state = STATE_IDLE
                     self.current_card = None
         else:
-            # Mutate mode: staggered reveal
+            # Mutate mode: staggered reveal (6 elements: A, ×, B, sep, HOW, MUTATION)
             if self.state == STATE_REVEALING:
-                for i in range(5):
+                for i in range(6):
                     line_start = i * STAGGER_DELAY
                     if elapsed > line_start:
                         progress = min((elapsed - line_start) / FADE_DURATION, 1.0)
@@ -521,6 +533,31 @@ class App:
             trad = f"[{self.directive['tradition'].upper()}]"
             trad_surf = self._render(self.font_xs, trad, self._fade_color(TEXT_GHOST, alphas[4]))
             self.screen.blit(trad_surf, (lm + 10, y))
+
+        # Mutation result
+        if alphas[5] > 0 and self.mutation_result:
+            y += 24
+            # Separator bar
+            result_bar_color = self._fade_color(TEXT_DIM, alphas[5])
+            bar_text = "▓" * (content_w // CHAR_W_APPROX)
+            bar_surf = self._render(self.font_sm, bar_text, result_bar_color)
+            self.screen.blit(bar_surf, (lm, y))
+            y += 16
+
+            # Label
+            label_text = "═══ MUTATION ═══"
+            label_color = self._fade_color(TEXT_DIM, alphas[5])
+            label_surf = self._render(self.font_sm, label_text, label_color)
+            self.screen.blit(label_surf, (w // 2 - label_surf.get_width() // 2, y))
+            y += 20
+
+            # Mutation text
+            mut_color = self._fade_color(TEXT_BRT, alphas[5])
+            mut_lines = self._wrap(self.mutation_result['text'], self.font_md, content_w - 20)
+            lh = self._line_h(self.font_md)
+            for i, line in enumerate(mut_lines):
+                surf = self._render(self.font_md, line, mut_color)
+                self.screen.blit(surf, (w // 2 - surf.get_width() // 2, y + i * lh))
 
     def _draw_mutate_card(self, label, card_data, x, y, max_w, alpha):
         label_color = self._fade_color(RED_CORE, alpha)
